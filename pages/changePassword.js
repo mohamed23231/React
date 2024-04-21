@@ -2,14 +2,30 @@ import { useState } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
 import ChangePasswordForm from '../components/auth/ChangePasswordForm';
+const baseUrl = 'https://goride.e-diamond.pro/api';
 
  
 /**
  * Schema for validating signup form data using Zod.
  */
 const schema = z.object({
-    email: z.string().email(),
-});
+    old_password:z.string()
+    .min(8),
+    new_password: z.string()
+    .min(8)
+    .regex(
+        /(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-_=+{};:,<.>ยง~])(?=.{8,})/,
+        { message: 'Password must contain at least one lowercase letter, one uppercase letter, and one special character' }
+    ),
+    re_new_password: z.string()
+    .transform((data) => {
+        if (data.confirmPassword !== data.password) {
+            throw new Error("Passwords don't match");
+        }
+        return data.confirmPassword;
+    })
+
+})
 
 /**
  * Component for handling user signup.
@@ -22,7 +38,9 @@ export default function Signup() {
     const [isLoading, setIsLoading] = useState(false);
     // State for form data
     const [formData, setFormData] = useState({
-        email: "",
+        old_password: "",
+        new_password: "",
+        re_new_password: ""
     });
 
     /**
@@ -30,7 +48,7 @@ export default function Signup() {
      */
     const changePwLogic = async () => {
         try {
-            const res = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup', 
+            const res = await axios.post(`${baseUrl}/auth/password/change/`, 
             formData,
             );
 

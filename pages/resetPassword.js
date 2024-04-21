@@ -2,8 +2,9 @@ import { useState } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
 import ResetPasswordForm from '../components/auth/ResetPasswordForm';
+const baseUrl = 'https://goride.e-diamond.pro/api';
 
- 
+
 /**
  * Schema for validating signup form data using Zod.
  */
@@ -20,6 +21,8 @@ export default function Signup() {
     const [formErrors, setFormErrors] = useState({});
     // State for loading status
     const [isLoading, setIsLoading] = useState(false);
+
+    const [mailSent, setMailSent] = useState(false)
     // State for form data
     const [formData, setFormData] = useState({
         email: "",
@@ -30,28 +33,29 @@ export default function Signup() {
      */
     const resetPwLogic = async () => {
         try {
-            const res = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup', 
-            formData,
-            );
-
-            console.log(res.data);
+            const res = await axios.post(`${baseUrl}/auth/password/request-reset/`, formData);
+            if (res.data.success) {
+                console.log('hello')
+                setMailSent(true);
+            }
         } catch (error) {
             if (error?.response) {
                 setFormErrors({ ...formErrors, serverError: error.response.data.message });
             }
         }
     };
-
+        
     /**
      * Handler for form submission.
      * @param {Event} e - Form submit event.
      */
     const handleSubmite = async (e) => {
+        console.log('clicked sub')
         e.preventDefault();
         setIsLoading(true); // Set loading to true when the button is clicked
         try {
             await schema.parseAsync(formData); // Validate the form data asynchronously
-            await loginLogic(); // Perform signup logic
+            await resetPwLogic(); // Perform signup logic
         } catch (error) {
             if (error.errors && error.errors.length > 0) {
                 const errors = {};
@@ -78,10 +82,11 @@ export default function Signup() {
     return (
         <ResetPasswordForm
             handleChange={handleChange}
-            handleSubmi={handleSubmite}
+            handleSubmite={handleSubmite}
             formData={formData}
             formErrors={formErrors}
             isLoading={isLoading}
+            mailSent={mailSent}
         />
     );
 }

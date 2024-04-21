@@ -3,6 +3,7 @@ import axios from 'axios';
 import { z } from 'zod';
 import { useRouter } from 'next/router';
 
+const baseUrl='https://goride.e-diamond.pro/api';
 import LoginForm from '../components/auth/LoginForm';
 
 /**
@@ -22,6 +23,7 @@ const schema = z.object({
  * Component for handling user login.
  */
 export default function Login() {
+    const [emailVerified,setEmailVerified]=useState(true)
     const router = useRouter();
     // const [ssLoggedIn,setIsLoggedIn]=useState('false')
     // State for form errors
@@ -46,20 +48,33 @@ export default function Login() {
      */
     const loginLogic = async () => {
         try {
-            const res = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signin', {
+            const res = await axios.post(`${baseUrl}/auth/login/`, {
                 ...formData,
             });
-            const token = res.data.token;
-            localStorage.setItem('loggedUserP', token);
-            router.push('/profile');
+            console.log(res)
+            if(!res.data.email_verified){
+                setEmailVerified(false)
+            } else if (res.data.email_verified && !res.data.profile_completed) {
+                const token = res.data.token;
+                localStorage.setItem('loggedUserP', token);
+                router.push('/profile');
 
+            }else if (res.data.email_verified && res.data.profile_completed) {
+                const token = res.data.token;
+                localStorage.setItem('loggedUserP', token);
+                router.push('/');
+        
+            }
             console.log(token);
         } catch (error) {
+            console.log('hello from login error',error)
+
             if (error?.response) {
                 setFormErrors({ ...formErrors, serverError: error.response.data.message });
             }
         }
     };
+
 
     /**
      * Handler for form submission.
@@ -84,6 +99,15 @@ export default function Login() {
         }
     };
 
+    const  requestVerifyCode= async()=>{
+        try {
+            const resVerify = await axios.post(`${baseUrl}/auth/email/request-verify/`, {
+                email:formData?.email,
+            });
+        } catch (error) {
+            
+        }
+    }
     /**
      * Handler for input changes.
      * @param {Event} e - Input change event.
@@ -101,6 +125,8 @@ export default function Login() {
             formData={formData}
             formErrors={formErrors}
             isLoading={isLoading}
+            emailVerified={emailVerified}
+            requestVerifyCode={requestVerifyCode}
         />
     );
 }

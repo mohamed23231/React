@@ -1,5 +1,5 @@
 import { Spinner } from "@nextui-org/spinner";
-export default function ResetPasswordForm({ formData, handleChange, handleSubmite, formErrors, isLoading }) {
+export default function ResetPasswordForm({ formData, handleChange, handleSubmite, formErrors, isLoading, mailSent }) {
     return (
         <>
 
@@ -7,7 +7,7 @@ export default function ResetPasswordForm({ formData, handleChange, handleSubmit
                 <form className="max-w-sm mx-auto grow" >
                     <h2 className="font-semibold text-4xl mb-7 text-center">Forget Password</h2>
                     <div className="text-center my-5 text-gray-400	">
-                    <p >Enter your email address and we will send you a link to reset your password</p>
+                        <p >Enter your email address and we will send you a link to reset your password</p>
                     </div>
                     <div className="mb-5 ">
                         <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
@@ -18,8 +18,8 @@ export default function ResetPasswordForm({ formData, handleChange, handleSubmit
                     {formErrors?.serverError && <div className="text-center border bg-red-600 text-white rounded-lg mb-5 p-3"> {formErrors?.serverError}</div>}
                     <button disabled={isLoading} onClick={handleSubmite} type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full  px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                         {isLoading ? <Spinner color="white" size="sm" /> : 'Reset Password'}
-                        </button>
-
+                    </button>
+                    {mailSent && <div className=" mt-3 bg-green-400 text-sm text-center p-5 border rounded-lg">We have sent you a link to reset your password</div>}
                 </form>
             </div>
 

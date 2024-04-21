@@ -3,6 +3,7 @@ import axios from 'axios';
 import { z } from 'zod';
 import SignupForm from '../components/auth/SignupForm';
 import { useRouter } from 'next/router';
+const baseUrl='https://goride.e-diamond.pro/api';
 
 /**
  * Schema for validating signup form data using Zod.
@@ -31,7 +32,7 @@ export default function Signup() {
     const router = useRouter();
 
     // State for form errors
-    const [formErrors, setFormErrors] = useState({});
+    const [formErrors, setFormErrors] = useState({email : ['User with this Email Address already exists.',"helllasd"]});
     // State for loading status
     const [isLoading, setIsLoading] = useState(false);
     // State for form data
@@ -47,20 +48,29 @@ export default function Signup() {
     const loginLogic = async () => {
         try {
             console.log('hello')
-            const res = await axios.post('https://ecommerce.routemisr.com/api/v1/auth/signup', {
+            const res = await axios.post(`${baseUrl}/auth/signup/`, {
                 email: formData.email,
                 password: formData.password,
-                name: 'test',
-                rePassword: formData.confirmPassword,
-                phone: "01010700700"
             });
+            console.log(res)
+            console.log(res.data);
             router.push('/login');
 
-            console.log(res.data);
         } catch (error) {
             console.log('hello from login error',error)
             if (error?.response) {
-                setFormErrors({ ...formErrors, serverError: error.response.data.message });
+
+                const formErrors = {};
+
+                Object.keys(error.response.data).forEach((field)=>{
+                    
+                    const errors=error.response.data[field]
+                    formErrors[field] = errors;
+                    console.log(errors)
+                })
+                console.log(formErrors)
+                setFormErrors(formErrors)
+
             }
         }
     };
