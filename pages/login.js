@@ -3,7 +3,7 @@ import axios from 'axios';
 import { z } from 'zod';
 import { useRouter } from 'next/router';
 
-const baseUrl='https://goride.e-diamond.pro/api';
+const baseUrl = 'https://goride.e-diamond.pro/api';
 import LoginForm from '../components/auth/LoginForm';
 
 /**
@@ -23,7 +23,9 @@ const schema = z.object({
  * Component for handling user login.
  */
 export default function Login() {
-    const [emailVerified,setEmailVerified]=useState(true)
+    const [emailVerified, setEmailVerified] = useState(false)
+    const [mailSent, setMailSent] = useState(false)
+
     const router = useRouter();
     // const [ssLoggedIn,setIsLoggedIn]=useState('false')
     // State for form errors
@@ -52,22 +54,26 @@ export default function Login() {
                 ...formData,
             });
             console.log(res)
-            if(!res.data.email_verified){
-                setEmailVerified(false)
+            if (!res.data.email_verified) {
+                console.log('fatal1')
+
+                setEmailVerified(true)
             } else if (res.data.email_verified && !res.data.profile_completed) {
+                console.log('fatal2')
                 const token = res.data.token;
                 localStorage.setItem('loggedUserP', token);
                 router.push('/profile');
 
-            }else if (res.data.email_verified && res.data.profile_completed) {
+            } else if (res.data.email_verified && res.data.profile_completed) {
+                console.log('fatal3')
+
                 const token = res.data.token;
                 localStorage.setItem('loggedUserP', token);
                 router.push('/');
-        
+
             }
-            console.log(token);
         } catch (error) {
-            console.log('hello from login error',error)
+            console.log('hello from login error', error)
 
             if (error?.response) {
                 setFormErrors({ ...formErrors, serverError: error.response.data.message });
@@ -99,13 +105,21 @@ export default function Login() {
         }
     };
 
-    const  requestVerifyCode= async()=>{
+    const requestVerifyCode = async () => {
         try {
             const resVerify = await axios.post(`${baseUrl}/auth/email/request-verify/`, {
-                email:formData?.email,
+                email: formData?.email,
             });
+            console.log(resVerify)
+            if (resVerify.data.success) {
+                console.log('hello')
+                setEmailVerified(false)
+
+                setMailSent(true);
+            }
+
         } catch (error) {
-            
+
         }
     }
     /**
@@ -127,6 +141,7 @@ export default function Login() {
             isLoading={isLoading}
             emailVerified={emailVerified}
             requestVerifyCode={requestVerifyCode}
+            mailSent={mailSent}
         />
     );
 }

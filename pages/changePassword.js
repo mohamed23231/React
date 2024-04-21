@@ -4,33 +4,31 @@ import { z } from 'zod';
 import ChangePasswordForm from '../components/auth/ChangePasswordForm';
 const baseUrl = 'https://goride.e-diamond.pro/api';
 
- 
 /**
- * Schema for validating signup form data using Zod.
+ * Schema for validating password change form data using Zod.
  */
 const schema = z.object({
-    old_password:z.string()
-    .min(8),
+    old_password: z.string()
+        .min(8),
     new_password: z.string()
-    .min(8)
-    .regex(
-        /(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-_=+{};:,<.>ยง~])(?=.{8,})/,
-        { message: 'Password must contain at least one lowercase letter, one uppercase letter, and one special character' }
-    ),
+        .min(8)
+        .regex(
+            /(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()\-_=+{};:,<.>ยง~])(?=.{8,})/,
+            { message: 'Password must contain at least one lowercase letter, one uppercase letter, and one special character' }
+        ),
     re_new_password: z.string()
-    .transform((data) => {
-        if (data.confirmPassword !== data.password) {
-            throw new Error("Passwords don't match");
-        }
-        return data.confirmPassword;
-    })
-
-})
+        .transform((data) => {
+            if (data.re_new_password !== data.new_password) {
+                throw new Error("Passwords don't match");
+            }
+            return data.re_new_password;
+        })
+});
 
 /**
- * Component for handling user signup.
+ * Component for handling password change.
  */
-export default function Signup() {
+export default function ChangePassword() {
 
     // State for form errors
     const [formErrors, setFormErrors] = useState({});
@@ -44,14 +42,11 @@ export default function Signup() {
     });
 
     /**
-     * Logic for user signup.
+     * Logic for password change.
      */
     const changePwLogic = async () => {
         try {
-            const res = await axios.post(`${baseUrl}/auth/password/change/`, 
-            formData,
-            );
-
+            const res = await axios.post(`${baseUrl}/auth/password/change/`, formData);
             console.log(res.data);
         } catch (error) {
             if (error?.response) {
@@ -64,12 +59,12 @@ export default function Signup() {
      * Handler for form submission.
      * @param {Event} e - Form submit event.
      */
-    const handleSubmite = async (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true); // Set loading to true when the button is clicked
         try {
             await schema.parseAsync(formData); // Validate the form data asynchronously
-            await loginLogic(); // Perform signup logic
+            await changePwLogic(); // Perform password change logic
         } catch (error) {
             if (error.errors && error.errors.length > 0) {
                 const errors = {};
@@ -79,7 +74,7 @@ export default function Signup() {
                 setFormErrors(errors);
             }
         } finally {
-            setIsLoading(false); // Set loading to false after signup logic completes
+            setIsLoading(false); // Set loading to false after password change logic completes
         }
     };
 
@@ -92,11 +87,11 @@ export default function Signup() {
         setFormErrors({ ...formErrors, [e.target.name]: undefined, serverError: undefined });
     };
 
-    // Render the SignupForm component with props
+    // Render the ChangePasswordForm component with props
     return (
         <ChangePasswordForm
             handleChange={handleChange}
-            handleSubmi={handleSubmite}
+            handleSubmit={handleSubmit}
             formData={formData}
             formErrors={formErrors}
             isLoading={isLoading}

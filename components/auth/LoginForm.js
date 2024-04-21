@@ -1,7 +1,7 @@
 import { Spinner } from "@nextui-org/spinner";
 import Link from 'next/link';
 
-export default function LoginForm({ formData, handleChange, handleSubmite, formErrors, isLoading,emailVerified,requestVerifyCode }) {
+export default function LoginForm({ formData, handleChange, handleSubmite, formErrors, isLoading,emailVerified,requestVerifyCode,mailSent }) {
     return (
         <>
 
@@ -30,7 +30,7 @@ export default function LoginForm({ formData, handleChange, handleSubmite, formE
                         {isLoading ? <Spinner color="white" size="sm" /> : 'Submit'}
                         </button>
 
-                    {!emailVerified ? <div className="mt-3 bg-red-400	 text-sm text-center p-5 border rounded-lg" >
+                    {emailVerified ? <div className="mt-3 bg-red-400	 text-sm text-center p-5 border rounded-lg" >
                         <p className="">Please Check your mailbox to verify your account</p>
 
                        
@@ -38,6 +38,8 @@ export default function LoginForm({ formData, handleChange, handleSubmite, formE
                        
                         
                     </div> : null}  
+                    {mailSent && <div className=" mt-3 bg-green-400 text-sm text-center p-5 border rounded-lg">We have sent you a mail please check your mail box</div>}
+
                 </form>
             </div>
 
