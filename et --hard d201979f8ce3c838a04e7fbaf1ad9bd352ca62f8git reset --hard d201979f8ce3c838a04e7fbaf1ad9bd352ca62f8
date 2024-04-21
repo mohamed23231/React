@@ -1,0 +1,29 @@
+[33mcommit d201979f8ce3c838a04e7fbaf1ad9bd352ca62f8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m
+Author: M Moamen <moamenm791@gmail.com>
+Date:   Mon Apr 22 00:56:24 2024 +0200
+
+    fix typo issue
+
+[33mcommit c63244fe7ecf18f80ef55556ddf76f382f7cf97d[m
+Author: M Moamen <moamenm791@gmail.com>
+Date:   Mon Apr 22 00:47:19 2024 +0200
+
+    enhanced login messages
+
+[33mcommit 3ecc3719fb10b1802b5425527251c02b36972b8d[m
+Author: M Moamen <moamenm791@gmail.com>
+Date:   Mon Apr 22 00:25:08 2024 +0200
+
+    fix error handle and wired endpoints
+
+[33mcommit c22de77590233bb072ee0fdb011e47f629c12ecb[m
+Author: M Moamen <moamenm791@gmail.com>
+Date:   Sun Apr 21 01:52:23 2024 +0200
+
+    added files
+
+[33mcommit 1854e3a99dd6ae0e354e3201bc86341fce570163[m
+Author: M Moamen <moamenm791@gmail.com>
+Date:   Sun Apr 21 01:51:06 2024 +0200
+
+    first commit
