@@ -32,7 +32,7 @@ export default function Signup() {
     const router = useRouter();
 
     // State for form errors
-    const [formErrors, setFormErrors] = useState({email : ['User with this Email Address already exists.',"helllasd"]});
+    const [formErrors, setFormErrors] = useState({});
     // State for loading status
     const [isLoading, setIsLoading] = useState(false);
     // State for form data
