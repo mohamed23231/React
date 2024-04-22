@@ -13,7 +13,7 @@ const Navbar = () => {
         // Check if localStorage is available (executing in the browser)
         if (typeof window !== 'undefined') {
             // Access localStorage and update isLoggedIn state accordingly
-            setIsLoggedIn(localStorage.getItem('loggedUserP') ? true : false);
+            setIsLoggedIn(localStorage.getItem('accessToken') ? true : false); // need to add although expiration date Verification
         }
     }, []);
 
@@ -21,10 +21,14 @@ const Navbar = () => {
     const handleLogout = () => {
         // Check if localStorage is available (executing in the browser)
         if (typeof window !== 'undefined') {
-            // Remove token from localStorage
-            localStorage.removeItem('loggedUserP');
+            // Remove tokens from localStorage
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('refreshToken');
+            localStorage.removeItem('tokenExpiration');
             // Update isLoggedIn state
             setIsLoggedIn(false);
+            // Redirect to home page
+            router.push('/');
         }
     };
 
