@@ -84,34 +84,43 @@ export default function Signup() {
         
         setIsLoading(true); // Set loading to true when the button is clicked
         try {
-
             if (!formData.email || !formData.password || !formData.confirmPassword) {
                 throw new Error('Incomplete form data');
+            }
+    
+            if (formData.password !== formData.confirmPassword) {
+                throw new Error("Passwords don't match");
             }
     
             console.log('Before schema validation');
             await schema.parseAsync(formData);
             console.log('After schema validation');
-        
+            
             await loginLogic(); // Perform signup logic
         } catch (error) {
             console.error('Validation Error:', error);
             console.log('Error Message:', error.message); // Add this line for debugging
-
+    
             if (error.message === "Passwords don't match") {
                 setFormErrors({ ...formErrors, confirmPassword: "Passwords don't match" });
             } else if (error.errors && error.errors.length > 0) {
-                const errors = {};
+                const errors = { ...formErrors };
                 error.errors.forEach(err => {
-                    errors[err.path[0]] = err.message;
+                    if (err.path[0] === 'email') {
+                        errors.email = errors.email || [];
+                        errors.email.push(err.message);
+                    } else {
+                        errors[err.path[0]] = err.message;
+                    }
                 });
                 setFormErrors(errors);
-                }
+            }
         } finally {
             setIsLoading(false); // Set loading to false after signup logic completes
         }
     };
-
+        
+    
     /**
      * Handler for input changes.
      * @param {Event} e - Input change event.
