@@ -2,13 +2,10 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { z } from 'zod';
 import { useRouter } from 'next/router';
-
-const baseUrl = 'https://goride.e-diamond.pro/api';
 import LoginForm from '../components/auth/LoginForm';
 
-/**
- * Schema for validating login form data using Zod.
- */
+const baseUrl = 'https://goride.e-diamond.pro/api';
+
 const schema = z.object({
     email: z.string().email(),
     password: z.string()
@@ -19,79 +16,73 @@ const schema = z.object({
         )
 });
 
-/**
- * Component for handling user login.
- */
-export default function Login() {
-    const [emailVerified, setEmailVerified] = useState(false)
-    const [mailSent, setMailSent] = useState(false)
-
+const Login = () => {
+    const [emailVerified, setEmailVerified] = useState(false);
+    const [mailSent, setMailSent] = useState(false);
     const router = useRouter();
-    // const [ssLoggedIn,setIsLoggedIn]=useState('false')
-    // State for form errors
     const [formErrors, setFormErrors] = useState({});
-    // State for loading status
     const [isLoading, setIsLoading] = useState(false);
-    // State for form data
     const [formData, setFormData] = useState({
         email: "",
         password: ""
     });
 
-    // Redirect to profile page if user is already logged in
     useEffect(() => {
-        if (localStorage.getItem('loggedUserP')) {
-            router.push('/profile');
+        const accessToken = localStorage.getItem('accessToken');
+        const tokenExpiration = localStorage.getItem('tokenExpiration');
+        
+        if (accessToken && tokenExpiration) {
+            const expirationTime = parseInt(tokenExpiration);
+            const currentTime = Date.now();
+            
+            if (currentTime < expirationTime) {
+                router.push('/profile');
+            }
         }
     }, []);
-
-    /**
-     * Logic for user login.
-     */
+    
     const loginLogic = async () => {
         try {
             const res = await axios.post(`${baseUrl}/auth/login/`, {
                 ...formData,
             });
-            console.log(res)
+
             if (!res.data.email_verified) {
-                console.log('fatal1')
+                setEmailVerified(true);
+                const { access, refresh } = res.data.tokens;
+                const expirationTime = new Date(Date.now() + 30 * 60 * 1000); // Current time + 30 minutes
+                localStorage.setItem('accessToken', access);
+                localStorage.setItem('refreshToken', refresh);
+                localStorage.setItem('tokenExpiration', expirationTime.getTime()); // Save expiration time
 
-                setEmailVerified(true)
             } else if (res.data.email_verified && !res.data.profile_completed) {
-                console.log('fatal2')
-                const token = res.data.token;
-                localStorage.setItem('loggedUserP', token);
+                const { access, refresh } = res.data.tokens;
+                const expirationTime = new Date(Date.now() + 30 * 60 * 1000); // Current time + 30 minutes
+                localStorage.setItem('accessToken', access);
+                localStorage.setItem('refreshToken', refresh);
+                localStorage.setItem('tokenExpiration', expirationTime.getTime()); // Save expiration time
                 router.push('/profile');
-
             } else if (res.data.email_verified && res.data.profile_completed) {
-                console.log('fatal3')
-
-                const token = res.data.token;
-                localStorage.setItem('loggedUserP', token);
+                const { access, refresh } = res.data.tokens;
+                const expirationTime = new Date(Date.now() + 30 * 60 * 1000); // Current time + 30 minutes
+                localStorage.setItem('accessToken', access);
+                localStorage.setItem('refreshToken', refresh);
+                localStorage.setItem('tokenExpiration', expirationTime.getTime()); // Save expiration time
                 router.push('/');
-
             }
         } catch (error) {
-            console.log('hello from login error', error)
-
             if (error?.response) {
                 setFormErrors({ ...formErrors, serverError: error.response.data.message });
             }
         }
     };
 
-
-    /**
-     * Handler for form submission.
-     * @param {Event} e - Form submit event.
-     */
     const handleSubmite = async (e) => {
         e.preventDefault();
-        setIsLoading(true); // Set loading to true when the button is clicked
+        setIsLoading(true);
         try {
-            await schema.parseAsync(formData); // Validate the form data asynchronously
-            await loginLogic(); // Perform login logic
+            await schema.parseAsync(formData);
+            await loginLogic();
         } catch (error) {
             if (error.errors && error.errors.length > 0) {
                 const errors = {};
@@ -101,7 +92,7 @@ export default function Login() {
                 setFormErrors(errors);
             }
         } finally {
-            setIsLoading(false); // Set loading to false after login logic completes
+            setIsLoading(false);
         }
     };
 
@@ -110,28 +101,20 @@ export default function Login() {
             const resVerify = await axios.post(`${baseUrl}/auth/email/request-verify/`, {
                 email: formData?.email,
             });
-            console.log(resVerify)
             if (resVerify.data.success) {
-                console.log('hello')
-                setEmailVerified(false)
-
+                setEmailVerified(false);
                 setMailSent(true);
             }
-
         } catch (error) {
-
+            // Handle error
         }
-    }
-    /**
-     * Handler for input changes.
-     * @param {Event} e - Input change event.
-     */
+    };
+
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
         setFormErrors({ ...formErrors, [e.target.name]: undefined, serverError: undefined });
     };
 
-    // Render the LoginForm component with props
     return (
         <LoginForm
             handleChange={handleChange}
@@ -144,4 +127,6 @@ export default function Login() {
             mailSent={mailSent}
         />
     );
-}
+};
+
+export default Login;
