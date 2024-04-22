@@ -46,7 +46,7 @@ const Login = () => {
             const res = await axios.post(`${baseUrl}/auth/login/`, {
                 ...formData,
             });
-
+    
             if (!res.data.email_verified) {
                 setEmailVerified(true);
                 const { access, refresh } = res.data.tokens;
@@ -54,7 +54,6 @@ const Login = () => {
                 localStorage.setItem('accessToken', access);
                 localStorage.setItem('refreshToken', refresh);
                 localStorage.setItem('tokenExpiration', expirationTime.getTime()); // Save expiration time
-
             } else if (res.data.email_verified && !res.data.profile_completed) {
                 const { access, refresh } = res.data.tokens;
                 const expirationTime = new Date(Date.now() + 30 * 60 * 1000); // Current time + 30 minutes
@@ -71,11 +70,14 @@ const Login = () => {
                 router.push('/');
             }
         } catch (error) {
-            if (error?.response) {
+            if (error.response && error.response.status === 401) {
+                setFormErrors({ ...formErrors, serverError: 'Invalid email or password' });
+            } else if (error?.response) {
                 setFormErrors({ ...formErrors, serverError: error.response.data.message });
             }
         }
     };
+        
 
     const handleSubmite = async (e) => {
         e.preventDefault();
@@ -84,17 +86,21 @@ const Login = () => {
             await schema.parseAsync(formData);
             await loginLogic();
         } catch (error) {
+            console.error('Error during form submission:', error);
             if (error.errors && error.errors.length > 0) {
                 const errors = {};
                 error.errors.forEach(err => {
                     errors[err.path[0]] = err.message;
                 });
                 setFormErrors(errors);
+            } else if (error?.response) {
+                setFormErrors({ ...formErrors, serverError: error.response.data.message });
             }
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     const requestVerifyCode = async () => {
         try {
